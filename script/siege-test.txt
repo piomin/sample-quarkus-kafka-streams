@@ -1,0 +1,10 @@
+http://<route>/transactions/product/1
+http://<route>/transactions/product/2
+http://<route>/transactions/product/3
+http://<route>/transactions/product/4
+http://<route>/transactions/product/5
+http://<route>/transactions/product/6
+http://<route>/transactions/product/7
+http://<route>/transactions/product/8
+http://<route>/transactions/product/9
+http://<route>/transactions/summary
