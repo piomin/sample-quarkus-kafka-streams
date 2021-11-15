@@ -6,6 +6,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Outgoing;
 import org.jboss.logging.Logger;
 import pl.piomin.samples.streams.order.model.Order;
+import pl.piomin.samples.streams.order.model.Order2;
 import pl.piomin.samples.streams.order.model.OrderType;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -22,7 +23,7 @@ public class OrderService {
     @Inject
     Logger log;
 
-    long orderId = 100;
+    long orderId = 200;
 
     Map<Integer, Integer> prices = Map.of(
             1, 1000,

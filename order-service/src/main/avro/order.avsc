@@ -1,0 +1,43 @@
+{
+  "namespace": "pl.piomin.samples.streams.order.model",
+  "type": "record",
+  "name": "Order2",
+  "fields": [
+    {
+      "name": "id",
+      "type": "long"
+    },
+    {
+      "name": "productId",
+      "type": "int"
+    },
+    {
+      "name": "customerId",
+      "type": "int"
+    },
+    {
+      "name": "productCount",
+      "type": "int"
+    },
+    {
+      "name": "amount",
+      "type": "int"
+    },
+    {
+      "name": "type",
+      "type": {
+        "type": "enum",
+        "name": "OrderType2",
+        "namespace": "pl.piomin.samples.streams.order.model",
+        "symbols": [
+          "BUY", "SELL"
+        ]
+      }
+    },
+    {
+      "name": "creationDate",
+      "type": "long",
+      "logicalType": "date"
+    }
+  ]
+}
