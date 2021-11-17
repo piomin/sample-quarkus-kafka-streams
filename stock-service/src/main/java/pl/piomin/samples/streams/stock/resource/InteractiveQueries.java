@@ -3,9 +3,11 @@ package pl.piomin.samples.streams.stock.resource;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StoreQueryParameters;
+import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.apache.kafka.streams.state.ReadOnlyWindowStore;
 import pl.piomin.samples.streams.stock.StockService;
 import pl.piomin.samples.streams.stock.model.TransactionTotal;
 
@@ -29,7 +31,17 @@ public class InteractiveQueries {
         return getTransactionsPerProductStore().get(productId);
     }
 
-    public Map<Integer, TransactionTotal> getAllTransactionsPerProductData(Integer productId) {
+    public Map<Integer, TransactionTotal> getAllLatestTransactionsPerProductData() {
+        Map<Integer, TransactionTotal> m = new HashMap<>();
+        KeyValueIterator<Windowed<Integer>, TransactionTotal> it = getTransactionsPerProductStore30s().all();
+        while (it.hasNext()) {
+            KeyValue<Windowed<Integer>, TransactionTotal> kv = it.next();
+            m.put(kv.key.key(), kv.value);
+        }
+        return m;
+    }
+
+    public Map<Integer, TransactionTotal> getAllTransactionsPerProductData() {
         Map<Integer, TransactionTotal> m = new HashMap<>();
         KeyValueIterator<Integer, TransactionTotal> it = getTransactionsPerProductStore().all();
         while (it.hasNext()) {
@@ -51,4 +63,9 @@ public class InteractiveQueries {
                         .fromNameAndType(StockService.TRANSACTIONS_PER_PRODUCT_SUMMARY, QueryableStoreTypes.keyValueStore()));
     }
 
+    private ReadOnlyWindowStore<Integer, TransactionTotal> getTransactionsPerProductStore30s() {
+        return streams.store(
+                StoreQueryParameters
+                        .fromNameAndType(StockService.TRANSACTIONS_PER_PRODUCT_SUMMARY_30S, QueryableStoreTypes.windowStore()));
+    }
 }

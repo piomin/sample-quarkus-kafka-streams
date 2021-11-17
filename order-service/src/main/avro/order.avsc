@@ -38,6 +38,10 @@
       "name": "creationDate",
       "type": "long",
       "logicalType": "date"
+    },
+    {
+      "name": "test",
+      "type": "string"
     }
   ]
 }

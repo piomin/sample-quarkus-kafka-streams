@@ -8,6 +8,7 @@ import org.jboss.logging.Logger;
 import pl.piomin.samples.streams.order.model.Order;
 import pl.piomin.samples.streams.order.model.Order2;
 import pl.piomin.samples.streams.order.model.OrderType;
+import pl.piomin.samples.streams.order.model.OrderType2;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -23,7 +24,12 @@ public class OrderService {
     @Inject
     Logger log;
 
-    long orderId = 200;
+    static long orderId = 1000;
+
+    public static synchronized long incrementOrderId() {
+        orderId = orderId + 1;
+        return orderId;
+    }
 
     Map<Integer, Integer> prices = Map.of(
             1, 1000,
@@ -54,73 +60,113 @@ public class OrderService {
             new Order(++orderId, 10, 1, 200, null, OrderType.SELL, 1020)
     ));
 
+//    @Outgoing("orders-buy")
+//    public Multi<Record<Long, Order>> buyOrdersGenerator() {
+//        return Multi.createFrom().ticks().every(Duration.ofMillis(1000))
+//                .map(order -> {
+//                    if (buyOrders.peek() != null) {
+//                        Order o = buyOrders.poll();
+//                        Record<Long, Order> r = Record.of(o.getId(), o);
+//                        log.infof("Sent: %s", r.value());
+//                        return r;
+//                    } else {
+//                        return Record.of(0L, new Order());
+//                    }
+//                })
+//                .filter(r -> !r.key().equals(0L));
+//    }
+//
+//    @Outgoing("orders-sell")
+//    public Multi<Record<Long, Order>> sellOrdersGenerator() {
+//        return Multi.createFrom().ticks().every(Duration.ofMillis(1000))
+//                .map(order -> {
+//                    if (sellOrders.peek() != null) {
+//                        Order o = sellOrders.poll();
+//                        Record<Long, Order> r = Record.of(o.getId(), o);
+//                        log.infof("Sent: %s", r.value());
+//                        return r;
+//                    } else {
+//                        return Record.of(0L, new Order());
+//                    }
+//                })
+//                .filter(r -> !r.key().equals(0L));
+//    }
+
     @Outgoing("orders-buy")
     public Multi<Record<Long, Order>> buyOrdersGenerator() {
-        return Multi.createFrom().ticks().every(Duration.ofMillis(1000))
+        return Multi.createFrom().ticks().every(Duration.ofMillis(500))
                 .map(order -> {
-                    if (buyOrders.peek() != null) {
-                        Order o = buyOrders.poll();
-                        Record<Long, Order> r = Record.of(o.getId(), o);
-                        log.infof("Sent: %s", r.value());
-                        return r;
-                    } else {
-                        return Record.of(0L, new Order());
-                    }
-                })
-                .filter(r -> !r.key().equals(0L));
+                    Integer productId = random.nextInt(10) + 1;
+                    int price = prices.get(productId) + random.nextInt(200);
+                    Order o = new Order(
+                            incrementOrderId(),
+                            random.nextInt(1000) + 1,
+                            productId,
+                            100 * (random.nextInt(5) + 1),
+                            LocalDateTime.now(),
+                            OrderType.BUY,
+                            price);
+                    log.infof("Sent: %s", o);
+                    return Record.of(o.getId(), o);
+                });
     }
 
     @Outgoing("orders-sell")
     public Multi<Record<Long, Order>> sellOrdersGenerator() {
-        return Multi.createFrom().ticks().every(Duration.ofMillis(1000))
+        return Multi.createFrom().ticks().every(Duration.ofMillis(500))
                 .map(order -> {
-                    if (sellOrders.peek() != null) {
-                        Order o = sellOrders.poll();
-                        Record<Long, Order> r = Record.of(o.getId(), o);
-                        log.infof("Sent: %s", r.value());
-                        return r;
-                    } else {
-                        return Record.of(0L, new Order());
-                    }
-                })
-                .filter(r -> !r.key().equals(0L));
+                    Integer productId = random.nextInt(10) + 1;
+                    int price = prices.get(productId) + random.nextInt(200);
+                    Order o = new Order(
+                            incrementOrderId(),
+                            random.nextInt(1000) + 1,
+                            productId,
+                            100 * (random.nextInt(5) + 1),
+                            LocalDateTime.now(),
+                            OrderType.SELL,
+                            price);
+                    log.infof("Sent: %s", o);
+                    return Record.of(o.getId(), o);
+                });
     }
 
 //    @Outgoing("orders-buy")
-//    public Multi<Record<Long, Order>> buyOrdersGenerator() {
+//    public Multi<Record<Long, Order2>> buyOrdersGenerator() {
 //        return Multi.createFrom().ticks().every(Duration.ofMillis(5000))
 //                .map(order -> {
-//                    Integer productId = random.nextInt(10) + 1;
+//                    int productId = random.nextInt(10) + 1;
 //                    int price = prices.get(productId) + random.nextInt(200);
-//                    Order o = new Order(
-//                            ++orderId,
-//                            random.nextInt(1000) + 1,
-//                            productId,
-//                            100 * (random.nextInt(5) + 1),
-//                            LocalDateTime.now(),
-//                            OrderType.BUY,
-//                            price);
-//                    log.infof("Sent: %s", o);
-//                    return Record.of(o.getId(), o);
+//                    Order2 o2 = Order2.newBuilder()
+//                            .setId(++orderId)
+//                            .setType(OrderType2.BUY)
+//                            .setCustomerId(random.nextInt(1000) + 1)
+//                            .setProductId(productId)
+//                            .setProductCount(100 * (random.nextInt(5) + 1))
+//                            .setCreationDate(new Date().getTime())
+//                            .setAmount(price)
+//                            .build();
+//                    log.infof("Sent: %s", o2);
+//                    return Record.of(o2.getId(), o2);
 //                });
 //    }
-
+//
 //    @Outgoing("orders-sell")
-//    public Multi<Record<Long, Order>> sellOrdersGenerator() {
+//    public Multi<Record<Long, Order2>> sellOrdersGenerator() {
 //        return Multi.createFrom().ticks().every(Duration.ofMillis(5000))
 //                .map(order -> {
-//                    Integer productId = random.nextInt(10) + 1;
+//                    int productId = random.nextInt(10) + 1;
 //                    int price = prices.get(productId) + random.nextInt(200);
-//                    Order o = new Order(
-//                            ++orderId,
-//                            random.nextInt(1000) + 1,
-//                            productId,
-//                            100 * (random.nextInt(5) + 1),
-//                            LocalDateTime.now(),
-//                            OrderType.SELL,
-//                            price);
-//                    log.infof("Sent: %s", o);
-//                    return Record.of(o.getId(), o);
+//                    Order2 o2 = Order2.newBuilder()
+//                            .setId(++orderId)
+//                            .setType(OrderType2.SELL)
+//                            .setCustomerId(random.nextInt(1000) + 1)
+//                            .setProductId(productId)
+//                            .setProductCount(100 * (random.nextInt(5) + 1))
+//                            .setCreationDate(new Date().getTime())
+//                            .setAmount(price)
+//                            .build();
+//                    log.infof("Sent: %s", o2);
+//                    return Record.of(o2.getId(), o2);
 //                });
 //    }
 }

@@ -6,13 +6,15 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 public class TransactionTotal {
     private int count;
     private int amount;
+    private int productCount;
 
     public TransactionTotal() {
     }
 
-    public TransactionTotal(int count, int amount) {
+    public TransactionTotal(int count, int amount, int productCount) {
         this.count = count;
         this.amount = amount;
+        this.productCount = productCount;
     }
 
     public int getCount() {
@@ -31,11 +33,20 @@ public class TransactionTotal {
         this.amount = amount;
     }
 
+    public int getProductCount() {
+        return productCount;
+    }
+
+    public void setProductCount(int productCount) {
+        this.productCount = productCount;
+    }
+
     @Override
     public String toString() {
         return "TransactionTotal{" +
                 "count=" + count +
                 ", amount=" + amount +
+                ", productCount=" + productCount +
                 '}';
     }
 }

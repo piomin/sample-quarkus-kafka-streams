@@ -8,6 +8,7 @@ import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.KeyValueBytesStoreSupplier;
 import org.apache.kafka.streams.state.Stores;
+import org.apache.kafka.streams.state.WindowBytesStoreSupplier;
 import org.jboss.logging.Logger;
 import pl.piomin.samples.streams.stock.logic.OrderLogic;
 import pl.piomin.samples.streams.stock.model.Order;
@@ -28,6 +29,7 @@ public class StockService {
 
     public static final String TRANSACTIONS_ALL_SUMMARY = "transactions-all-summary";
     public static final String TRANSACTIONS_PER_PRODUCT_SUMMARY = "transactions-per-product-summary";
+    public static final String TRANSACTIONS_PER_PRODUCT_SUMMARY_30S = "transactions-per-product-summary-30s";
 
     private static final String ORDERS_BUY_TOPIC = "orders.buy";
     private static final String ORDERS_SELL_TOPIC = "orders.sell";
@@ -51,6 +53,8 @@ public class StockService {
                 TRANSACTIONS_ALL_SUMMARY);
         KeyValueBytesStoreSupplier storePerProductSupplier = Stores.persistentKeyValueStore(
                 TRANSACTIONS_PER_PRODUCT_SUMMARY);
+        WindowBytesStoreSupplier windowStoreSupplier = Stores.persistentWindowStore(
+                TRANSACTIONS_PER_PRODUCT_SUMMARY_30S, Duration.ofSeconds(30), Duration.ofSeconds(30), false);
 
         StreamsBuilder builder = new StreamsBuilder();
 
@@ -78,12 +82,13 @@ public class StockService {
 
         builder.stream(TRANSACTIONS_TOPIC, Consumed.with(Serdes.Long(), transactionSerde))
                 .groupBy((k, v) -> v.getStatus(), Grouped.with(Serdes.String(), transactionSerde))
-//                .windowedBy(TimeWindows.of(Duration.ofSeconds(30)))
                 .aggregate(
                         TransactionTotal::new,
                         (k, v, a) -> {
                             a.setCount(a.getCount() + 1);
-                            a.setAmount(a.getAmount() + v.getAmount());
+                            a.setProductCount(a.getAmount() + v.getAmount());
+                            a.setAmount(a.getProductCount() +
+                                    (v.getAmount() * v.getPrice()));
                             return a;
                         },
                         Materialized.<String, TransactionTotal> as(storeSupplier)
@@ -100,20 +105,44 @@ public class StockService {
                         JoinWindows.of(Duration.ofSeconds(10)),
                         StreamJoined.with(Serdes.Long(), transactionSerde, orderSerde))
                 .groupBy((k, v) -> v.getProductId(), Grouped.with(Serdes.Integer(), transactionWithProductSerde))
-//                .windowedBy(TimeWindows.of(Duration.ofSeconds(30)))
                 .aggregate(
                         TransactionTotal::new,
                         (k, v, a) -> {
                             a.setCount(a.getCount() + 1);
-                            a.setAmount(a.getAmount() + v.getTransaction().getAmount());
+                            a.setProductCount(a.getAmount() + v.getTransaction().getAmount());
+                            a.setAmount(a.getProductCount() +
+                                    (v.getTransaction().getAmount() * v.getTransaction().getPrice()));
                             return a;
                         },
                         Materialized.<Integer, TransactionTotal> as(storePerProductSupplier)
                                 .withKeySerde(Serdes.Integer())
                                 .withValueSerde(transactionTotalSerde))
                 .toStream()
-                .peek((k, v) -> log.infof("Total(%d): %s", k, v))
+                .peek((k, v) -> log.infof("Total per product(%d): %s", k, v))
                 .to(TRANSACTIONS_PER_PRODUCT_AGGREGATED_TOPIC, Produced.with(Serdes.Integer(), transactionTotalSerde));
+
+        builder.stream(TRANSACTIONS_TOPIC, Consumed.with(Serdes.Long(), transactionSerde))
+                .selectKey((k, v) -> v.getSellOrderId())
+                .join(orders.selectKey((k, v) -> v.getId()),
+                        (t, o) -> new TransactionWithProduct(t, o.getProductId()),
+                        JoinWindows.of(Duration.ofSeconds(30)),
+                        StreamJoined.with(Serdes.Long(), transactionSerde, orderSerde))
+                .groupBy((k, v) -> v.getProductId(), Grouped.with(Serdes.Integer(), transactionWithProductSerde))
+                .windowedBy(TimeWindows.of(Duration.ofSeconds(30)))
+                .aggregate(
+                        TransactionTotal::new,
+                        (k, v, a) -> {
+                            a.setCount(a.getCount() + 1);
+                            a.setProductCount(a.getAmount() + v.getTransaction().getAmount());
+                            a.setAmount(a.getProductCount() +
+                                    (v.getTransaction().getAmount() * v.getTransaction().getPrice()));
+                            return a;
+                        },
+                        Materialized.<Integer, TransactionTotal> as(windowStoreSupplier)
+                                .withKeySerde(Serdes.Integer())
+                                .withValueSerde(transactionTotalSerde))
+                .toStream()
+                .peek((k, v) -> log.infof("Total windowed(%d): %s", k.key(), v));
 
         return builder.build();
     }
