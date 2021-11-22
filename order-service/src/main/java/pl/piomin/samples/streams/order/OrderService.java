@@ -3,12 +3,10 @@ package pl.piomin.samples.streams.order;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.reactive.messaging.kafka.Record;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.Outgoing;
 import org.jboss.logging.Logger;
-import pl.piomin.samples.streams.order.model.Order;
-import pl.piomin.samples.streams.order.model.Order2;
-import pl.piomin.samples.streams.order.model.OrderType;
-import pl.piomin.samples.streams.order.model.OrderType2;
+import pl.piomin.samples.streams.order.model.*;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -128,6 +126,11 @@ public class OrderService {
                     log.infof("Sent: %s", o);
                     return Record.of(o.getId(), o);
                 });
+    }
+
+    @Incoming("transactions")
+    public void transactions(Transaction transaction) {
+        log.infof("New: %s", transaction);
     }
 
 //    @Outgoing("orders-buy")
