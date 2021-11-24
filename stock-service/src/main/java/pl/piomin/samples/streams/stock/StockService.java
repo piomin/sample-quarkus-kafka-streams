@@ -159,7 +159,7 @@ public class StockService {
                         ++transactionId,
                         orderBuy.getId(),
                         orderSell.getId(),
-                        Math.min(orderBuy.getProductCount(), orderSell.getProductCount()),
+                        count,
                         (orderBuy.getAmount() + orderSell.getAmount()) / 2,
                         LocalDateTime.now(),
                         "NEW"
