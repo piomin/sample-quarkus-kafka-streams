@@ -11,7 +11,7 @@ The following picture illustrates our architecture:
 ## Run locally
 
 ### Usage
-You need to have Maven, JDK11+ and Docker installed on your local machine.
+You need to have Maven, JDK11+ and Docker (or Testcontainers Cloud Agent) installed on your local machine.
 
 First, run the `order-service`:
 ```shell
