@@ -1,5 +1,12 @@
 # Kafka Streams with Quarkus [![Twitter](https://img.shields.io/twitter/follow/piotr_minkowski.svg?style=social&logo=twitter&label=Follow%20Me)](https://twitter.com/piotr_minkowski)
 
+[![CircleCI](https://circleci.com/gh/piomin/sample-quarkus-kafka-streams.svg?style=svg)](https://circleci.com/gh/piomin/sample-quarkus-kafka-streams)
+
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-black.svg)](https://sonarcloud.io/dashboard?id=piomin_sample-quarkus-kafka-streams)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=piomin_sample-quarkus-kafka-streams&metric=bugs)](https://sonarcloud.io/dashboard?id=piomin_sample-quarkus-kafka-streams)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=piomin_sample-quarkus-kafka-streams&metric=coverage)](https://sonarcloud.io/dashboard?id=piomin_sample-quarkus-kafka-streams)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=piomin_sample-quarkus-kafka-streams&metric=ncloc)](https://sonarcloud.io/dashboard?id=piomin_sample-quarkus-kafka-streams)
+
 This repository is related with the article: [Kafka Streams with Quarkus](https://piotrminkowski.com/2021/11/24/kafka-streams-with-quarkus/).
 
 It shows how to build a simple stock market application that consumes Kafka Streams.
