@@ -25,7 +25,6 @@ workflows:
       - maven/test:
           executor: j17
           context: Testcontainers
-          command: 'clean package -Dquarkus.kubernetes.deploy=false'
           pre-steps:
             - tcc/setup
       - analyze:
