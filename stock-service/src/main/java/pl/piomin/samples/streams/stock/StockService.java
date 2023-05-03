@@ -16,9 +16,9 @@ import pl.piomin.samples.streams.stock.model.Transaction;
 import pl.piomin.samples.streams.stock.model.TransactionTotal;
 import pl.piomin.samples.streams.stock.model.TransactionWithProduct;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 import java.time.Duration;
 import java.time.LocalDateTime;
 

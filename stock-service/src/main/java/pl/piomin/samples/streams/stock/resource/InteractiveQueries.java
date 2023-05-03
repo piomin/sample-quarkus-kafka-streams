@@ -11,10 +11,9 @@ import org.apache.kafka.streams.state.ReadOnlyWindowStore;
 import pl.piomin.samples.streams.stock.StockService;
 import pl.piomin.samples.streams.stock.model.TransactionTotal;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @ApplicationScoped
