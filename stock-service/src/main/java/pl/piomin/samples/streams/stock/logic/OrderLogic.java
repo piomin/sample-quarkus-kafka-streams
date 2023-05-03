@@ -1,14 +1,13 @@
 package pl.piomin.samples.streams.stock.logic;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.jboss.logging.Logger;
 import pl.piomin.samples.streams.stock.model.Order;
 import pl.piomin.samples.streams.stock.repository.OrderRepository;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.persistence.LockModeType;
-import javax.transaction.Transactional;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.LockModeType;
+import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class OrderLogic {
