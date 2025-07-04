@@ -128,7 +128,7 @@ public class StockService {
                         JoinWindows.of(Duration.ofSeconds(30)),
                         StreamJoined.with(Serdes.Long(), transactionSerde, orderSerde))
                 .groupBy((k, v) -> v.getProductId(), Grouped.with(Serdes.Integer(), transactionWithProductSerde))
-                .windowedBy(TimeWindows.of(Duration.ofSeconds(30)))
+                .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(30)))
                 .aggregate(
                         TransactionTotal::new,
                         (k, v, a) -> {
